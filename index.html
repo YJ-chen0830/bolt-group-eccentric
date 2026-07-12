@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>螺栓群偏心接合分析 | Eccentric Bolt Group Analysis</title>
+<script src="https://yj-chen0830.github.io/jrh-core/jrh-core.js?v=3" defer></script>
+<style>
+  :root{--navy:#0b1f3a;--navy2:#13284a;--gold:#c9a14a;--gold2:#e0bf6e;--bg:#f5f3ee;--ink:#1c2530;--line:#d8d2c2;}
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:"Noto Sans TC","Segoe UI",sans-serif;background:var(--bg);color:var(--ink);}
+  header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#f5f3ee;padding:28px 32px;}
+  header h1{margin:0;font-size:22px;}
+  header span{color:var(--gold2);font-size:13px;display:block;margin-top:4px;}
+  main{max-width:1100px;margin:0 auto;padding:28px 20px 60px;}
+  .grid{display:grid;grid-template-columns:380px 1fr;gap:24px;}
+  @media(max-width:900px){.grid{grid-template-columns:1fr;}}
+  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px 24px;box-shadow:0 2px 8px rgba(0,0,0,.05);margin-bottom:20px;}
+  .card h2{font-size:14.5px;margin:0 0 18px;color:var(--navy);font-weight:700;display:flex;align-items:center;gap:8px;border-bottom:2px solid var(--gold);padding-bottom:10px;}
+  label{display:block;font-size:12px;color:#666;margin:10px 0 4px;font-weight:500;}
+  input,select{width:100%;padding:8px 11px;border:1.5px solid var(--line);border-radius:7px;font-size:13.5px;background:#fafaf8;}
+  input:focus,select:focus{outline:none;border-color:var(--gold);}
+  .sec{font-size:12px;font-weight:700;color:var(--navy);margin:16px 0 6px;border-left:4px solid var(--gold);padding-left:9px;letter-spacing:.04em;text-transform:uppercase;}
+  .note{font-size:11.5px;color:#999;margin-top:12px;line-height:1.75;background:#f9f7f2;border-radius:6px;padding:9px 12px;}
+  button.calc-btn{margin-top:16px;width:100%;padding:12px;border:none;border-radius:8px;background:var(--navy);color:#fff;font-size:14.5px;font-weight:700;cursor:pointer;}
+  button.calc-btn:hover{background:var(--navy2);}
+  button.pro-btn{margin-top:12px;width:100%;padding:12px;border:none;border-radius:8px;background:var(--gold);color:var(--navy);font-size:14.5px;font-weight:700;cursor:pointer;}
+  button.pro-btn:hover{filter:brightness(1.08);}
+  table{width:100%;border-collapse:collapse;margin-top:10px;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+  th{background:var(--navy);color:#f5f3ee;font-weight:600;font-size:12px;padding:9px 10px;text-align:left;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  td{padding:9px 10px;font-size:13px;border-bottom:1px solid var(--line);}
+  tr:nth-child(even) td{background:#f9f7f3;}
+  td:last-child{text-align:right;font-weight:700;}
+  .ok{color:#1a7d3a;font-weight:700;}.ng{color:#c0392b;font-weight:700;}
+  .governing{background:#fdf2ec!important;}
+  details.proc{margin-top:16px;border:1px solid var(--line);border-radius:8px;background:#fafaf8;overflow:hidden;}
+  details.proc summary{cursor:pointer;padding:10px 14px;font-weight:700;font-size:13px;color:var(--navy);user-select:none;list-style:none;display:flex;align-items:center;gap:6px;}
+  details.proc summary::before{content:"▶";font-size:10px;transition:transform .2s;}
+  details[open].proc summary::before{transform:rotate(90deg);}
+  details.proc pre{margin:0;padding:12px 16px 16px;font-family:"Courier New",monospace;font-size:11px;line-height:1.8;white-space:pre-wrap;color:#2c3e50;border-top:1px solid var(--line);max-height:480px;overflow-y:auto;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+  .proj-section{background:#fff;border:1px solid var(--gold);border-radius:10px;padding:18px 22px;margin-bottom:20px;}
+  .proj-section h3{margin:0 0 12px;color:var(--navy);font-size:14px;font-weight:700;}
+  .proj-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  @media(max-width:600px){.proj-grid{grid-template-columns:1fr;}}
+  .itemRow{border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:10px;background:#fafaf8;position:relative;}
+  .itemRow .del{position:absolute;right:8px;top:8px;background:#c0392b;color:#fff;border:none;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:12px;padding:0;}
+  .item-label{font-size:12px;font-weight:600;color:#0b1f3a;margin-bottom:6px;}
+  .add-btn{margin-top:10px;width:100%;padding:9px;border:1.5px dashed var(--gold);border-radius:7px;background:#fff;color:var(--navy);font-size:13px;font-weight:600;cursor:pointer;}
+  @media print{
+    header,.no-print{display:none!important;}
+    body{background:#fff;margin:0;font-size:9pt;line-height:1.5;color:#111;}
+    main{padding:0;max-width:100%!important;}
+    .grid{grid-template-columns:1fr!important;gap:10pt!important;}
+    .card{box-shadow:none!important;border:1px solid #ccc!important;border-radius:4pt!important;padding:10pt 12pt!important;break-inside:avoid;}
+    .card h2{font-size:10.5pt!important;padding-bottom:6pt!important;margin-bottom:9pt!important;}
+    table{border:1px solid #bbb!important;border-radius:0!important;margin-top:6pt!important;}
+    th{font-size:8pt!important;padding:5pt 7pt!important;background:#0b1f3a!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    td{font-size:8.5pt!important;padding:5pt 7pt!important;}
+    details.proc{display:block!important;margin-top:10pt!important;border:1pt solid #0b1f3a!important;border-radius:4pt!important;break-inside:avoid;background:#f9f9f6!important;max-height:none!important;}
+    details.proc>summary{display:none!important;}
+    details.proc::before{content:"📋  計算過程（供第三方檢核）";display:block;font-weight:700;font-size:8pt;color:#0b1f3a;padding:6pt 10pt 4pt;border-bottom:1px solid #ccc;letter-spacing:.04em;}
+    details.proc>pre{font-size:6.5pt!important;line-height:1.5!important;white-space:pre-wrap!important;padding:6pt 10pt 10pt!important;color:#1a1a1a!important;font-family:"Courier New",monospace!important;}
+    .proj-section{border:1.5pt solid #0b1f3a!important;border-radius:4pt!important;}
+    button.pro-btn,button.calc-btn,.add-btn,.del{display:none!important;}
+    @page{margin:15mm 12mm;size:A4;}
+  }
+</style>
+</head>
+<body data-tool="beg">
+<header>
+  <a href="https://yj-chen0830.github.io/engineering-hub/" style="color:var(--gold2);font-size:12.5px;text-decoration:none;display:inline-block;margin-bottom:8px;">← 返回工程計算中心</a>
+  <h1>螺栓群偏心接合分析 (Eccentric Bolt Group Analysis)</h1>
+  <span>彈性法（Elastic Method）· 任意螺栓配置之偏心剪力分配</span>
+</header>
+<main>
+
+<div class="proj-section no-print" id="projSection">
+  <h3>📁 專案資訊（列印時帶入計算書封面）</h3>
+  <div class="proj-grid">
+    <div><label>工程名稱</label><input id="pj-name" placeholder="○○工程"></div>
+    <div><label>工程地點</label><input id="pj-loc" placeholder="○○市○○區"></div>
+    <div><label>承造廠商</label><input id="pj-contractor" placeholder="○○營造股份有限公司"></div>
+    <div><label>文件編號</label><input id="pj-docno" placeholder="BEG-CAL-001"></div>
+    <div><label>計算者</label><input id="pj-calc" placeholder="姓名"></div>
+    <div><label>審核者</label><input id="pj-review" placeholder="姓名"></div>
+    <div><label>計算日期</label><input id="pj-date" type="date"></div>
+  </div>
+</div>
+
+<div class="grid">
+  <div>
+    <div class="card">
+      <h2>螺栓座標（任意平面座標，單位 mm）</h2>
+      <div id="boltsContainer"></div>
+      <button class="add-btn" onclick="addBolt()">+ 新增螺栓</button>
+    </div>
+    <div class="card">
+      <h2>載重條件</h2>
+      <div class="row2">
+        <div><label>載重大小 P (kN)</label><input id="beg-P" type="number" value="100" step="5" min="0"></div>
+        <div><label>載重方向角 θ (°，0=+X軸，90=+Y軸，270=向下)</label><input id="beg-theta" type="number" value="270" step="5"></div>
+      </div>
+      <div class="row2">
+        <div><label>載重作用點 X (mm)</label><input id="beg-Lx" type="number" value="200" step="10"></div>
+        <div><label>載重作用點 Y (mm)</label><input id="beg-Ly" type="number" value="0" step="10"></div>
+      </div>
+      <label>單支螺栓設計剪力容量 φRn (kN)</label>
+      <input id="beg-phiRn" type="number" value="60" step="5" min="1">
+      <button class="calc-btn" onclick="calcBEG()">計算螺栓群受力</button>
+      <div class="note">採彈性法（Elastic / Vector Method）：直接剪力（P/n，均分於各螺栓）+ 扭矩剪力（M×r/J，與形心距離成正比、方向垂直於形心連線）向量疊加，取合力最大之螺栓為控制螺栓。J 為螺栓群對形心之極慣性矩（以螺栓座標計算，假設各螺栓斷面積相同）。本法較彈性、保守，未考慮塑性重分配（瞬心法 Instantaneous Center of Rotation 可得較經濟但更複雜之結果），為業界最常用之手算/初步設計法。</div>
+    </div>
+  </div>
+  <div>
+    <div class="card">
+      <h2>計算結果</h2>
+      <div id="beg-result"><p style="color:#888">尚未計算</p></div>
+      <details class="proc" id="beg-proc" style="display:none">
+        <summary>📋 計算過程（供第三方檢核）</summary>
+        <pre id="beg-proc-text"></pre>
+      </details>
+      <button class="pro-btn no-print" onclick="openPro()">📄 產出計算書 PDF</button>
+    </div>
+  </div>
+</div>
+
+</main>
+<script>
+var bolts = [];
+var idc = 0;
+
+function addBolt(x,y){
+  bolts.push({id:idc++, x:(x!==undefined?x:0), y:(y!==undefined?y:0)});
+  renderBolts();
+}
+function delBolt(id){ bolts = bolts.filter(function(b){return b.id!==id;}); renderBolts(); }
+function renderBolts(){
+  var c = document.getElementById('boltsContainer');
+  c.innerHTML = '';
+  bolts.forEach(function(b, idx){
+    var div = document.createElement('div');
+    div.className = 'itemRow';
+    div.innerHTML =
+      '<button class="del" onclick="delBolt('+b.id+')">×</button>'+
+      '<div class="item-label">螺栓 B'+(idx+1)+'</div>'+
+      '<div class="row2">'+
+        '<div><label>X (mm)</label><input type="number" value="'+b.x+'" onchange="bolts['+idx+'].x=parseFloat(this.value)||0"></div>'+
+        '<div><label>Y (mm)</label><input type="number" value="'+b.y+'" onchange="bolts['+idx+'].y=parseFloat(this.value)||0"></div>'+
+      '</div>';
+    c.appendChild(div);
+  });
+}
+
+function openPro(){ JRH.checkEmail(function(){ jrhPrint('螺栓群偏心接合分析計算書'); }); }
+function f2(x){return x.toFixed(2);}
+function f3(x){return x.toFixed(3);}
+function f4(x){return x.toFixed(4);}
+function deg2rad(d){return d*Math.PI/180;}
+
+function calcBEG(){
+  var n = bolts.length;
+  var resDiv = document.getElementById('beg-result');
+  if (n < 2){
+    resDiv.innerHTML = '<p class="ng">請至少輸入 2 支螺栓。</p>';
+    document.getElementById('beg-proc').style.display='none';
+    return;
+  }
+  var P=parseFloat(document.getElementById('beg-P').value)||0;
+  var theta=parseFloat(document.getElementById('beg-theta').value)||0;
+  var Lx=parseFloat(document.getElementById('beg-Lx').value)||0;
+  var Ly=parseFloat(document.getElementById('beg-Ly').value)||0;
+  var phiRn=parseFloat(document.getElementById('beg-phiRn').value)||0;
+
+  var cx = bolts.reduce(function(s,b){return s+b.x;},0)/n;
+  var cy = bolts.reduce(function(s,b){return s+b.y;},0)/n;
+
+  var Fx_ext = P*Math.cos(deg2rad(theta));
+  var Fy_ext = P*Math.sin(deg2rad(theta));
+
+  var M = (Lx-cx)*Fy_ext - (Ly-cy)*Fx_ext; // kN*mm, moment about centroid
+
+  var rel = bolts.map(function(b){ return {rx:b.x-cx, ry:b.y-cy}; });
+  var J = rel.reduce(function(s,r){ return s+r.rx*r.rx+r.ry*r.ry; },0);
+
+  var results = bolts.map(function(b,i){
+    var r = rel[i];
+    var FxDirect = Fx_ext/n, FyDirect = Fy_ext/n;
+    var FxTors = J>1e-9 ? -M*r.ry/J : 0;
+    var FyTors = J>1e-9 ? M*r.rx/J : 0;
+    var Fx = FxDirect+FxTors, Fy = FyDirect+FyTors;
+    var R = Math.sqrt(Fx*Fx+Fy*Fy);
+    return {x:b.x, y:b.y, rx:r.rx, ry:r.ry, FxDirect:FxDirect, FyDirect:FyDirect, FxTors:FxTors, FyTors:FyTors, Fx:Fx, Fy:Fy, R:R};
+  });
+
+  var maxR = Math.max.apply(null, results.map(function(r){return r.R;}));
+  var govIdx = results.findIndex(function(r){return r.R===maxR;});
+  var ok = maxR <= phiRn;
+  var ratio = maxR/phiRn;
+
+  var rows = results.map(function(r,i){
+    var isGov = i===govIdx;
+    return '<tr'+(isGov?' class="governing"':'')+'><td>B'+(i+1)+(isGov?' ★控制':'')+'</td><td>'+f2(r.R)+' kN</td></tr>';
+  }).join('');
+
+  resDiv.innerHTML =
+    '<table><tr><th>項目</th><th>數值</th></tr>'+
+    '<tr><td>形心座標</td><td>('+f2(cx)+', '+f2(cy)+') mm</td></tr>'+
+    '<tr><td>外力分量 Fx, Fy</td><td>('+f2(Fx_ext)+', '+f2(Fy_ext)+') kN</td></tr>'+
+    '<tr><td>對形心之扭矩 M</td><td>'+f2(M)+' kN·mm</td></tr>'+
+    '<tr><td>極慣性矩 J</td><td>'+f2(J)+' mm²</td></tr>'+
+    '<tr><td>控制螺栓最大合力</td><td>'+f2(maxR)+' kN（B'+(govIdx+1)+'）</td></tr>'+
+    '<tr><td>設計容量 φRn（需≥控制合力）</td><td>'+f2(phiRn)+' kN '+(ok?'<span class="ok">OK</span>':'<span class="ng">NG</span>')+'</td></tr>'+
+    '<tr><td>需求/容量比</td><td>'+f2(ratio)+'</td></tr>'+
+    '</table>'+
+    '<table style="margin-top:14px"><tr><th>螺栓</th><th>合力</th></tr>'+rows+'</table>';
+
+  var p='';
+  p+='━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+  p+='  螺栓群偏心接合分析計算過程（彈性法）\n';
+  p+='━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+  p+='【輸入】\n';
+  p+='  螺栓數 n = '+n+'\n';
+  bolts.forEach(function(b,i){ p+='  B'+(i+1)+'：('+f2(b.x)+', '+f2(b.y)+') mm\n'; });
+  p+='  P = '+P+' kN，方向角 θ = '+theta+'°\n';
+  p+='  載重作用點 = ('+Lx+', '+Ly+') mm\n';
+  p+='  設計容量 φRn = '+phiRn+' kN\n\n';
+  p+='【一】形心座標\n';
+  p+='  cx = ΣXi/n = '+f2(cx*n)+'/'+n+' = '+f2(cx)+' mm\n';
+  p+='  cy = ΣYi/n = '+f2(cy*n)+'/'+n+' = '+f2(cy)+' mm\n\n';
+  p+='【二】外力分量與扭矩\n';
+  p+='  Fx = P×cosθ = '+P+'×cos('+theta+'°) = '+f2(Fx_ext)+' kN\n';
+  p+='  Fy = P×sinθ = '+P+'×sin('+theta+'°) = '+f2(Fy_ext)+' kN\n';
+  p+='  M = (Lx−cx)×Fy − (Ly−cy)×Fx\n';
+  p+='    = ('+Lx+'−'+f2(cx)+')×'+f2(Fy_ext)+' − ('+Ly+'−'+f2(cy)+')×'+f2(Fx_ext)+'\n';
+  p+='    = '+f2(M)+' kN·mm\n\n';
+  p+='【三】極慣性矩 J = Σ(rxi²+ryi²)\n';
+  rel.forEach(function(r,i){
+    p+='  B'+(i+1)+'：rx='+f2(r.rx)+', ry='+f2(r.ry)+'，r²='+f2(r.rx*r.rx+r.ry*r.ry)+'\n';
+  });
+  p+='  J = '+f2(J)+' mm²\n\n';
+  p+='【四】各螺栓受力（直接剪力 + 扭矩剪力向量疊加）\n';
+  results.forEach(function(r,i){
+    p+='  B'+(i+1)+'：\n';
+    p+='    直接剪力：Fx直=Fx/n='+f2(r.FxDirect)+' kN，Fy直=Fy/n='+f2(r.FyDirect)+' kN\n';
+    p+='    扭矩剪力：Fx扭=-M×ry/J='+f2(r.FxTors)+' kN，Fy扭=M×rx/J='+f2(r.FyTors)+' kN\n';
+    p+='    合成：Fx='+f2(r.Fx)+' kN，Fy='+f2(r.Fy)+' kN\n';
+    p+='    合力 R=√(Fx²+Fy²)='+f2(r.R)+' kN'+(i===govIdx?'　★ 控制螺栓':'')+'\n';
+  });
+  p+='\n【五】容量檢核\n';
+  p+='  控制螺栓 B'+(govIdx+1)+'：R='+f2(maxR)+' kN\n';
+  p+='  φRn = '+phiRn+' kN\n';
+  p+='  R/φRn = '+f2(ratio)+' → '+(ok?'OK ✓':'NG ✗')+'\n\n';
+  p+='━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n';
+  p+='  參考：彈性法（Elastic Method）— AISC 手冊常用偏心剪力連接簡化分析法\n';
+  p+='  瞬心法（Instantaneous Center of Rotation）可得較經濟之結果，但需疊代求解，未納入本工具。\n';
+  p+='━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━';
+  document.getElementById('beg-proc-text').textContent=p;
+  document.getElementById('beg-proc').style.display='';
+}
+
+addBolt(-50,75);
+addBolt(50,75);
+addBolt(-50,-75);
+addBolt(50,-75);
+calcBEG();
+</script>
+<script>
+window.jrhDocMeta={
+ "doc": "螺栓群偏心接合分析計算書",
+ "codes": [
+  "彈性法（Elastic Method / Vector Method）— AISC Steel Construction Manual 常用偏心剪力螺栓群分析法"
+ ],
+ "notes": [
+  "彈性法假設螺栓群為剛性體、各螺栓彈性抵抗，屬保守分析法；瞬心法（IC method）可得較經濟之容量但需疊代求解，本工具未涵蓋。",
+  "螺栓設計容量 φRn 應由使用者依螺栓等級、直徑、承壓/剪力破壞模式另行依 AISC 360 計算後輸入，本工具僅處理螺栓群之受力分配問題。",
+  "本工具假設所有螺栓斷面積相同；若螺栓尺寸不一致，極慣性矩計算需另行加權，本工具未涵蓋此情形。",
+  "本計算書應經結構工程技師簽證後，始得作為正式送審文件。"
+ ]
+};
+</script>
+</body>
+</html>
