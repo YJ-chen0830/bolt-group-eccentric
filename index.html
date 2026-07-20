@@ -246,7 +246,7 @@ function calcBEG(){
   var ok = maxR <= phiRn;
   var ratio = maxR/phiRn;
 
-  document.getElementById('beg-diagram').innerHTML = buildBEGDiagram(bolts,cx,cy,Lx,Ly,Fx_ext,Fy_ext,P,govIdx);
+  if(window.JRH && JRH.diagram) document.getElementById('beg-diagram').innerHTML = buildBEGDiagram(bolts,cx,cy,Lx,Ly,Fx_ext,Fy_ext,P,govIdx);
 
   var rows = results.map(function(r,i){
     var isGov = i===govIdx;
@@ -309,11 +309,19 @@ function calcBEG(){
   document.getElementById('beg-proc').style.display='';
 }
 
-addBolt(-50,75);
-addBolt(50,75);
-addBolt(-50,-75);
-addBolt(50,-75);
-calcBEG();
+function initDemo(){
+  addBolt(-50,75);
+  addBolt(50,75);
+  addBolt(-50,-75);
+  addBolt(50,-75);
+  calcBEG();
+}
+/* jrh-core.js（含 JRH.diagram）以 defer 載入，會晚於這段 inline script 執行，
+   所以首次示範計算要等 DOMContentLoaded 之後才跑，否則 buildBEGDiagram()
+   呼叫時 JRH.diagram 還不存在。使用者手動按「計算」按鈕時 jrh-core.js 早已
+   載入完成，不受影響。 */
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',initDemo);}
+else{initDemo();}
 </script>
 <script>
 window.jrhDocMeta={
