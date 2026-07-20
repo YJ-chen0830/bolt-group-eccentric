@@ -126,6 +126,7 @@
   <div>
     <div class="card">
       <h2>計算結果</h2>
+      <div id="beg-diagram"></div>
       <div id="beg-result"><p style="color:#888">尚未計算</p></div>
       <details class="proc" id="beg-proc" style="display:none">
         <summary>📋 計算過程（供第三方檢核）</summary>
@@ -169,12 +170,48 @@ function f3(x){return x.toFixed(3);}
 function f4(x){return x.toFixed(4);}
 function deg2rad(d){return d*Math.PI/180;}
 
+/* 螺栓群配置示意圖：等比例尺畫出各螺栓實際座標、形心位置，以及外力 P 作用
+   點與方向；控制螺栓（合力最大者）用紅色標示，其餘螺栓為深藍色，方便直接
+   對照計算過程中「哪一支螺栓在哪裡」而不用只看座標數字。 */
+function buildBEGDiagram(bolts,cx,cy,Lx,Ly,Fx_ext,Fy_ext,P,govIdx){
+  var W=460,H=320,pad=64;
+  var xs=bolts.map(function(b){return b.x;}).concat([Lx,cx]);
+  var ys=bolts.map(function(b){return b.y;}).concat([Ly,cy]);
+  var minX=Math.min.apply(null,xs), maxX=Math.max.apply(null,xs);
+  var minY=Math.min.apply(null,ys), maxY=Math.max.apply(null,ys);
+  var spanX=Math.max(maxX-minX,80), spanY=Math.max(maxY-minY,80);
+  var scale=Math.min((W-2*pad)/spanX,(H-2*pad)/spanY);
+  var midX=(minX+maxX)/2, midY=(minY+maxY)/2;
+  function sx(x){return W/2+(x-midX)*scale;}
+  function sy(y){return H/2-(y-midY)*scale;}
+
+  var D=JRH.diagram, s='';
+  s+=D.label(14,16,'螺栓群配置與受力示意圖（比例尺概略）',{anchor:'start',size:9,color:'#8a8370'});
+  var ccx=sx(cx), ccy=sy(cy);
+  s+='<line x1="'+(ccx-8)+'" y1="'+ccy+'" x2="'+(ccx+8)+'" y2="'+ccy+'" stroke="#c9a14a" stroke-width="1.6"/>';
+  s+='<line x1="'+ccx+'" y1="'+(ccy-8)+'" x2="'+ccx+'" y2="'+(ccy+8)+'" stroke="#c9a14a" stroke-width="1.6"/>';
+  s+=D.label(ccx,ccy-12,'形心',{size:8,color:'#9a7b2a'});
+  bolts.forEach(function(b,i){
+    var bx=sx(b.x), by=sy(b.y), isGov=i===govIdx;
+    s+='<circle cx="'+bx+'" cy="'+by+'" r="7" fill="'+(isGov?'#c0392b':'#0b1f3a')+'" stroke="#fff" stroke-width="1.5"/>';
+    s+=D.label(bx,by+20,'B'+(i+1)+(isGov?'★':''),{size:9,color:isGov?'#c0392b':'#333',weight:isGov?'700':'400'});
+  });
+  var lx=sx(Lx), ly=sy(Ly);
+  var ang=Math.atan2(-Fy_ext,Fx_ext), arrowLen=44;
+  var ex=lx+Math.cos(ang)*arrowLen, ey=ly+Math.sin(ang)*arrowLen;
+  s+=D.arrow(lx,ly,ex,ey,{color:'#c0392b',width:2});
+  s+='<circle cx="'+lx+'" cy="'+ly+'" r="3" fill="#c0392b"/>';
+  s+=D.label(ex+(Math.cos(ang)>=0?6:-6),ey,'P='+P.toFixed(0)+'kN',{size:9,color:'#c0392b',weight:'700',anchor:Math.cos(ang)>=0?'start':'end'});
+  return D.wrap(W,H,s,{maxWidth:440});
+}
+
 function calcBEG(){
   var n = bolts.length;
   var resDiv = document.getElementById('beg-result');
   if (n < 2){
     resDiv.innerHTML = '<p class="ng">請至少輸入 2 支螺栓。</p>';
     document.getElementById('beg-proc').style.display='none';
+    document.getElementById('beg-diagram').innerHTML='';
     return;
   }
   var P=parseFloat(document.getElementById('beg-P').value)||0;
@@ -208,6 +245,8 @@ function calcBEG(){
   var govIdx = results.findIndex(function(r){return r.R===maxR;});
   var ok = maxR <= phiRn;
   var ratio = maxR/phiRn;
+
+  document.getElementById('beg-diagram').innerHTML = buildBEGDiagram(bolts,cx,cy,Lx,Ly,Fx_ext,Fy_ext,P,govIdx);
 
   var rows = results.map(function(r,i){
     var isGov = i===govIdx;
